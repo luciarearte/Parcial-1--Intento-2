@@ -13,7 +13,11 @@ public class ControlIntroCinematica : MonoBehaviour
 
     [Header("Fachadas")]
     public GameObject fachadaNueva;     
-    public GameObject fachadaVieja;     
+    public GameObject fachadaVieja;    
+
+    [Header("Skyboxes (Cielos)")]
+    public Material skyboxSoleado;     
+    public Material skyboxLluvioso;     
 
     [Header("Interfaz (UI)")]
     public TMP_Text textoCapitulo;      
