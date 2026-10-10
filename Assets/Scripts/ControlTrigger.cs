@@ -1,32 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public class ControlTrigger : MonoBehaviour
 {
-    public GameObject textoCancion;
-    public GameObject indicadorE; 
+    public GameObject indicadorE;
     private bool jugadorEnZona = false;
 
     private void Start()
     {
-        if (textoCancion != null) textoCancion.SetActive(false);
-        if (indicadorE != null) indicadorE.SetActive(false);
-    } // <--- Faltaba esta llave para cerrar el Start()
+        if (indicadorE != null)
+            indicadorE.SetActive(false);
+    }
 
     private void Update()
     {
         if (jugadorEnZona && Input.GetKeyDown(KeyCode.E))
         {
-            if (textoCancion != null)
-            {
-                textoCancion.SetActive(!textoCancion.activeSelf);
-                
-                if (indicadorE != null)
-                {
-                    indicadorE.SetActive(!textoCancion.activeSelf);
-                }
-            }
+            Debug.Log("Recuerdo recogido: " + gameObject.name);
+            Destroy(gameObject);
         }
     }
 
@@ -35,11 +26,9 @@ public class ControlTrigger : MonoBehaviour
         if (other.CompareTag("Player") || other.name.ToLower() == "jugador")
         {
             jugadorEnZona = true;
-            
-            if (indicadorE != null && (textoCancion == null || !textoCancion.activeSelf))
-            {
+
+            if (indicadorE != null)
                 indicadorE.SetActive(true);
-            }
         }
     }
 
@@ -48,9 +37,9 @@ public class ControlTrigger : MonoBehaviour
         if (other.CompareTag("Player") || other.name.ToLower() == "jugador")
         {
             jugadorEnZona = false;
-            
-            if (textoCancion != null) textoCancion.SetActive(false); 
-            if (indicadorE != null) indicadorE.SetActive(false); 
+
+            if (indicadorE != null)
+                indicadorE.SetActive(false);
         }
     }
 }
