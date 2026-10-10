@@ -15,16 +15,19 @@ public class ControlIntroCinematica : MonoBehaviour
     public GameObject fachadaNueva;     
     public GameObject fachadaVieja;    
 
-    [Header("Skyboxes (Cielos)")]
+    [Header("Skyboxes")]
     public Material skyboxSoleado;     
-    public Material skyboxLluvioso;     
+    public Material skyboxLluvioso;  
+    public Light luzDireccional;   
 
-    [Header("Interfaz (UI)")]
+    [Header("UI")]
     public TMP_Text textoCapitulo;      
 
     [Header("Tiempos")]
     public float tiempoAntesDeCambio = 3f; 
     public float tiempoDeTransformacion = 5f; 
+
+
 
     void Start()
     {
@@ -61,6 +64,11 @@ public class ControlIntroCinematica : MonoBehaviour
             RenderSettings.skybox = skyboxLluvioso;
             DynamicGI.UpdateEnvironment();
            } 
+        {
+            if (luzDireccional != null)
+            luzDireccional.intensity=0.5f;
+            luzDireccional.color = Color.black;    
+            }
 
         yield return new WaitForSeconds(tiempoDeTransformacion - tiempoAntesDeCambio);
 
