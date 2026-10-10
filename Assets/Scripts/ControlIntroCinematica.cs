@@ -37,6 +37,11 @@ public class ControlIntroCinematica : MonoBehaviour
 
         if (textoCapitulo != null) textoCapitulo.gameObject.SetActive(true);
 
+        if (skyboxSoleado != null) 
+        {
+            RenderSettings.skybox = skyboxSoleado;
+        }
+
         StartCoroutine(SecuenciaIntro());
     }
 
@@ -50,6 +55,12 @@ public class ControlIntroCinematica : MonoBehaviour
 
         if (fachadaNueva != null) fachadaNueva.SetActive(false);
         if (fachadaVieja != null) fachadaVieja.SetActive(true);
+
+        if (skyboxLluvioso != null) 
+        {
+            RenderSettings.skybox = skyboxLluvioso;
+            DynamicGI.UpdateEnvironment();
+           } 
 
         yield return new WaitForSeconds(tiempoDeTransformacion - tiempoAntesDeCambio);
 
