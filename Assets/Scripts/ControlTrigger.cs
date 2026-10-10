@@ -4,6 +4,8 @@ using UnityEngine;
 public class ControlTrigger : MonoBehaviour
 {
     public GameObject indicadorE;
+    public GestorRecuerdos gestor;
+
     private bool jugadorEnZona = false;
 
     private void Start()
@@ -16,8 +18,14 @@ public class ControlTrigger : MonoBehaviour
     {
         if (jugadorEnZona && Input.GetKeyDown(KeyCode.E))
         {
-            Debug.Log("Recuerdo recogido: " + gameObject.name);
-            Destroy(gameObject);
+            if (gestor == null)
+                return;
+
+            if (gestor.CompletarRecuerdo(2))
+            {
+                Debug.Log("Recuerdo recogido: " + gameObject.name);
+                Destroy(gameObject);
+            }
         }
     }
 
