@@ -6,6 +6,7 @@ public class ControlTriggerCama : MonoBehaviour
 {
     public GameObject muneca;
     public float duracionAnimacion = 5f;
+    public GestorRecuerdos gestor;
 
     private bool jugadorEnZona = false;
     private bool recuerdoActivado = false;
@@ -20,11 +21,14 @@ public class ControlTriggerCama : MonoBehaviour
     {
         if (jugadorEnZona && Input.GetKeyDown(KeyCode.E) && !recuerdoActivado)
         {
-            if (muneca != null)
+            if (muneca != null && gestor != null)
             {
-                recuerdoActivado = true;
-                muneca.SetActive(true);
-                StartCoroutine(OcultarMuneca());
+                if (gestor.CompletarRecuerdo(1))
+                {
+                    recuerdoActivado = true;
+                    muneca.SetActive(true);
+                    StartCoroutine(OcultarMuneca());
+                }
             }
         }
     }

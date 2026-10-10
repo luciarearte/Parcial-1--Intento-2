@@ -6104,7 +6104,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: e966f49ea24916e4ca237601c875a813, type: 2}
     - target: {fileID: 4321599801401173435, guid: 3bb334b1ad3381248888db31242e94ae, type: 3}
       propertyPath: m_Name
-      value: Bed20
+      value: Trigger cama
       objectReference: {fileID: 0}
     - target: {fileID: 4518112164357228113, guid: 3bb334b1ad3381248888db31242e94ae, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -6204,6 +6204,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   muneca: {fileID: 4975909013952964936}
   duracionAnimacion: 10
+  gestor: {fileID: 1547271205}
 --- !u!65 &819784553
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -11611,6 +11612,51 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1547271204
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1547271206}
+  - component: {fileID: 1547271205}
+  m_Layer: 0
+  m_Name: GestorRecuerdos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1547271205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1547271204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 917b4ab163b0d03439b04c75d7ade6e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recuerdosEncontrados: 0
+--- !u!4 &1547271206
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1547271204}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.6968775, y: 9.498522, z: 4.1524777}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17336,6 +17382,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 571777603}
+  - {fileID: 1547271206}
   - {fileID: 394652695}
   - {fileID: 1531973283}
   - {fileID: 395602737}
