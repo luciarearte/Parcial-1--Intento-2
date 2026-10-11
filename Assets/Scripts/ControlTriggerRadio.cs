@@ -6,6 +6,7 @@ public class ControlTriggerRadio : MonoBehaviour
 {
     public GestorRecuerdos gestor;
     public GameObject munecaBailando;
+    public GameObject textoInteraccion;
     public float duracionRecuerdo = 8f;
 
     public AudioSource audioRecuerdo;
@@ -20,6 +21,9 @@ public class ControlTriggerRadio : MonoBehaviour
         if (munecaBailando != null)
             munecaBailando.SetActive(false);
 
+        if (textoInteraccion != null)
+            textoInteraccion.SetActive(false);
+
         if (audioRecuerdo == null)
             audioRecuerdo = GetComponent<AudioSource>();
     }
@@ -33,6 +37,9 @@ public class ControlTriggerRadio : MonoBehaviour
             if (gestor != null && gestor.CompletarRecuerdo(4))
             {
                 recuerdoActivado = true;
+
+                if (textoInteraccion != null)
+                    textoInteraccion.SetActive(false);
 
                 if (munecaBailando != null)
                 {
@@ -52,7 +59,15 @@ public class ControlTriggerRadio : MonoBehaviour
         if (audioRecuerdo == null || audioRecuerdo.clip == null)
             yield break;
 
-        float duracion = finAudio - inicioAudio;
+        float inicio = Mathf.Clamp(
+            inicioAudio, 0f, audioRecuerdo.clip.length
+        );
+
+        float fin = Mathf.Clamp(
+            finAudio, inicio, audioRecuerdo.clip.length
+        );
+
+        float duracion = fin - inicio;
 
         if (duracion <= 0f)
             yield break;
@@ -62,11 +77,10 @@ public class ControlTriggerRadio : MonoBehaviour
         float duracionFadeOut = Mathf.Min(1f, duracion * 0.5f);
 
         audioRecuerdo.Stop();
-        audioRecuerdo.time = inicioAudio;
+        audioRecuerdo.time = inicio;
         audioRecuerdo.volume = 0f;
         audioRecuerdo.Play();
 
-        // Entrada gradual.
         float tiempo = 0f;
 
         while (tiempo < duracionFadeIn)
@@ -84,13 +98,11 @@ public class ControlTriggerRadio : MonoBehaviour
 
         audioRecuerdo.volume = volumenObjetivo;
 
-        // Esperar hasta la salida gradual.
         float espera = duracion - duracionFadeIn - duracionFadeOut;
 
         if (espera > 0f)
             yield return new WaitForSeconds(espera);
 
-        // Salida gradual.
         tiempo = 0f;
 
         while (tiempo < duracionFadeOut)
@@ -124,6 +136,9 @@ public class ControlTriggerRadio : MonoBehaviour
             other.name.ToLower() == "jugador")
         {
             jugadorEnZona = true;
+
+            if (textoInteraccion != null && !recuerdoActivado)
+                textoInteraccion.SetActive(true);
         }
     }
 
@@ -133,6 +148,9 @@ public class ControlTriggerRadio : MonoBehaviour
             other.name.ToLower() == "jugador")
         {
             jugadorEnZona = false;
+
+            if (textoInteraccion != null)
+                textoInteraccion.SetActive(false);
         }
     }
 }
