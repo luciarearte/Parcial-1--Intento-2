@@ -1,5 +1,6 @@
 
 using UnityEngine;
+using TMPro;
 using System.Collections;
 
 public class ControlTrigger : MonoBehaviour
@@ -7,9 +8,17 @@ public class ControlTrigger : MonoBehaviour
     public GameObject indicadorE;
     public GestorRecuerdos gestor;
 
+    [Header("Audio")]
     public AudioSource audioRecuerdo;
     public float inicioAudio = 0f;
     public float finAudio = 4f;
+    public float volumenAudio = 0.4f;
+
+    [Header("Letra de la canción")]
+    public TMP_Text textoLetra;
+    [TextArea(2, 4)]
+    public string letraRecuerdo = "Escribí acá la letra";
+    public float duracionFade = 0.7f;
 
     public GameObject textoInteraccion;
 
@@ -26,6 +35,13 @@ public class ControlTrigger : MonoBehaviour
 
         if (audioRecuerdo == null)
             audioRecuerdo = GetComponent<AudioSource>();
+
+        if (textoLetra != null)
+        {
+            textoLetra.text = letraRecuerdo;
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(false);
+        }
     }
 
     private void Update()
@@ -47,8 +63,6 @@ public class ControlTrigger : MonoBehaviour
                 if (textoInteraccion != null)
                     textoInteraccion.SetActive(false);
 
-                Debug.Log("Recuerdo recogido: " + gameObject.name);
-
                 foreach (Renderer r in GetComponentsInChildren<Renderer>())
                     r.enabled = false;
 
@@ -62,64 +76,106 @@ public class ControlTrigger : MonoBehaviour
 
     private IEnumerator ReproducirAudioYEliminar()
     {
-        if (audioRecuerdo == null || audioRecuerdo.clip == null)
+        float duracion = 0f;
+
+        if (audioRecuerdo != null && audioRecuerdo.clip != null)
         {
-            Destroy(gameObject);
-            yield break;
+            float inicio = Mathf.Clamp(
+                inicioAudio, 0f, audioRecuerdo.clip.length);
+
+            float fin = Mathf.Clamp(
+                finAudio, inicio, audioRecuerdo.clip.length);
+
+            duracion = fin - inicio;
+
+            if (duracion > 0f)
+            {
+                audioRecuerdo.Stop();
+                audioRecuerdo.time = inicio;
+                audioRecuerdo.volume = 0f;
+                audioRecuerdo.Play();
+            }
         }
 
-        float inicio = Mathf.Clamp(inicioAudio, 0f, audioRecuerdo.clip.length);
-        float fin = Mathf.Clamp(finAudio, inicio, audioRecuerdo.clip.length);
-        float duracion = fin - inicio;
+        if (textoLetra != null)
+        {
+            textoLetra.text = letraRecuerdo;
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(true);
+        }
 
         if (duracion <= 0f)
         {
+            if (textoLetra != null)
+            {
+                textoLetra.alpha = 1f;
+                yield return new WaitForSeconds(2f);
+                textoLetra.gameObject.SetActive(false);
+            }
+
             Destroy(gameObject);
             yield break;
         }
 
-        float volumenObjetivo = 0.4f;
-        float duracionFadeIn = Mathf.Min(2f, duracion * 0.5f);
-        float duracionFadeOut = Mathf.Min(1f, duracion * 0.5f);
-
-        audioRecuerdo.Stop();
-        audioRecuerdo.time = inicio;
-        audioRecuerdo.volume = 0f;
-        audioRecuerdo.Play();
-
+        float fade = Mathf.Min(duracionFade, duracion / 2f);
         float tiempo = 0f;
 
-        while (tiempo < duracionFadeIn)
+        // Fade in de audio y letra
+        while (tiempo < fade)
         {
             tiempo += Time.deltaTime;
-            audioRecuerdo.volume = Mathf.Lerp(
-                0f, volumenObjetivo,
-                Mathf.Clamp01(tiempo / duracionFadeIn)
-            );
+            float progreso = Mathf.Clamp01(tiempo / fade);
+
+            if (audioRecuerdo != null)
+                audioRecuerdo.volume = Mathf.Lerp(
+                    0f, volumenAudio, progreso);
+
+            if (textoLetra != null)
+                textoLetra.alpha = progreso;
+
             yield return null;
         }
 
-        audioRecuerdo.volume = volumenObjetivo;
+        if (audioRecuerdo != null)
+            audioRecuerdo.volume = volumenAudio;
 
-        float espera = duracion - duracionFadeIn - duracionFadeOut;
+        if (textoLetra != null)
+            textoLetra.alpha = 1f;
+
+        float espera = duracion - fade * 2f;
 
         if (espera > 0f)
             yield return new WaitForSeconds(espera);
 
+        // Fade out de audio y letra
         tiempo = 0f;
 
-        while (tiempo < duracionFadeOut)
+        while (tiempo < fade)
         {
             tiempo += Time.deltaTime;
-            audioRecuerdo.volume = Mathf.Lerp(
-                volumenObjetivo, 0f,
-                Mathf.Clamp01(tiempo / duracionFadeOut)
-            );
+            float progreso = Mathf.Clamp01(tiempo / fade);
+
+            if (audioRecuerdo != null)
+                audioRecuerdo.volume = Mathf.Lerp(
+                    volumenAudio, 0f, progreso);
+
+            if (textoLetra != null)
+                textoLetra.alpha = 1f - progreso;
+
             yield return null;
         }
 
-        audioRecuerdo.Stop();
-        audioRecuerdo.volume = volumenObjetivo;
+        if (audioRecuerdo != null)
+        {
+            audioRecuerdo.Stop();
+            audioRecuerdo.volume = volumenAudio;
+        }
+
+        if (textoLetra != null)
+        {
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(false);
+        }
 
         Destroy(gameObject);
     }
