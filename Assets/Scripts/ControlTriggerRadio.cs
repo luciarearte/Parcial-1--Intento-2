@@ -10,13 +10,22 @@ public class ControlTriggerRadio : MonoBehaviour
     public GameObject textoInteraccion;
     public TMP_Text textoFraseFinal;
 
+    [Header("Duraciones")]
     public float duracionRecuerdo = 8f;
     public float duracionFrase = 4f;
     public float duracionFadeFrase = 1.5f;
 
+    [Header("Audio")]
     public AudioSource audioRecuerdo;
     public float inicioAudio = 0f;
     public float finAudio = 4f;
+    public float volumenAudio = 0.4f;
+
+    [Header("Letra de la canción")]
+    public TMP_Text textoLetra;
+    [TextArea(2, 4)]
+    public string letraRecuerdo = "Escribí acá la letra";
+    public float duracionFadeLetra = 0.7f;
 
     private bool jugadorEnZona = false;
     private bool recuerdoActivado = false;
@@ -34,11 +43,15 @@ public class ControlTriggerRadio : MonoBehaviour
             textoFraseFinal.text =
                 "Esta casa ya no guarda nada más de nosotros";
 
-            Color color = textoFraseFinal.color;
-            color.a = 0f;
-            textoFraseFinal.color = color;
-
+            textoFraseFinal.alpha = 0f;
             textoFraseFinal.gameObject.SetActive(false);
+        }
+
+        if (textoLetra != null)
+        {
+            textoLetra.text = letraRecuerdo;
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(false);
         }
 
         if (audioRecuerdo == null)
@@ -75,21 +88,20 @@ public class ControlTriggerRadio : MonoBehaviour
         if (audioRecuerdo != null && audioRecuerdo.clip != null)
         {
             float inicio = Mathf.Clamp(
-                inicioAudio, 0f, audioRecuerdo.clip.length
-            );
+                inicioAudio, 0f, audioRecuerdo.clip.length);
 
             float fin = Mathf.Clamp(
-                finAudio, inicio, audioRecuerdo.clip.length
-            );
+                finAudio, inicio, audioRecuerdo.clip.length);
 
             duracionAudio = fin - inicio;
         }
 
-        StartCoroutine(ReproducirAudio());
+        yield return StartCoroutine(ReproducirAudio());
 
-        yield return new WaitForSeconds(
-            Mathf.Max(duracionRecuerdo, duracionAudio)
-        );
+        // Mantener la muñeca visible durante el tiempo previsto.
+        if (duracionRecuerdo > duracionAudio)
+            yield return new WaitForSeconds(
+                duracionRecuerdo - duracionAudio);
 
         if (munecaBailando != null)
             munecaBailando.SetActive(false);
@@ -98,115 +110,133 @@ public class ControlTriggerRadio : MonoBehaviour
             yield return StartCoroutine(MostrarFrase());
     }
 
-    private IEnumerator MostrarFrase()
-    {
-        textoFraseFinal.text =
-            "Esta casa ya no guarda nada más de nosotros";
-
-        textoFraseFinal.gameObject.SetActive(true);
-
-        Color color = textoFraseFinal.color;
-
-        // Fade in: aparece lentamente.
-        float tiempo = 0f;
-
-        while (tiempo < duracionFadeFrase)
-        {
-            tiempo += Time.deltaTime;
-            color.a = Mathf.Clamp01(tiempo / duracionFadeFrase);
-            textoFraseFinal.color = color;
-            yield return null;
-        }
-
-        color.a = 1f;
-        textoFraseFinal.color = color;
-
-        // Mantener la frase visible.
-        yield return new WaitForSeconds(duracionFrase);
-
-        // Fade out: desaparece lentamente.
-        tiempo = 0f;
-
-        while (tiempo < duracionFadeFrase)
-        {
-            tiempo += Time.deltaTime;
-            color.a = 1f - Mathf.Clamp01(tiempo / duracionFadeFrase);
-            textoFraseFinal.color = color;
-            yield return null;
-        }
-
-        color.a = 0f;
-        textoFraseFinal.color = color;
-
-        textoFraseFinal.gameObject.SetActive(false);
-    }
-
     private IEnumerator ReproducirAudio()
     {
-        if (audioRecuerdo == null || audioRecuerdo.clip == null)
-            yield break;
+        float duracion = 0f;
 
-        float inicio = Mathf.Clamp(
-            inicioAudio, 0f, audioRecuerdo.clip.length
-        );
+        if (audioRecuerdo != null && audioRecuerdo.clip != null)
+        {
+            float inicio = Mathf.Clamp(
+                inicioAudio, 0f, audioRecuerdo.clip.length);
 
-        float fin = Mathf.Clamp(
-            finAudio, inicio, audioRecuerdo.clip.length
-        );
+            float fin = Mathf.Clamp(
+                finAudio, inicio, audioRecuerdo.clip.length);
 
-        float duracion = fin - inicio;
+            duracion = fin - inicio;
+        }
+
+        if (textoLetra != null)
+        {
+            textoLetra.text = letraRecuerdo;
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(true);
+        }
 
         if (duracion <= 0f)
-            yield break;
+        {
+            if (textoLetra != null)
+                textoLetra.gameObject.SetActive(false);
 
-        float volumenObjetivo = 0.4f;
-        float duracionFadeIn = Mathf.Min(2f, duracion * 0.5f);
-        float duracionFadeOut = Mathf.Min(1f, duracion * 0.5f);
+            yield break;
+        }
+
+        float fade = Mathf.Min(duracionFadeLetra, duracion / 2f);
 
         audioRecuerdo.Stop();
-        audioRecuerdo.time = inicio;
+        audioRecuerdo.time = inicioAudio;
         audioRecuerdo.volume = 0f;
         audioRecuerdo.Play();
 
         float tiempo = 0f;
 
-        while (tiempo < duracionFadeIn)
+        // Fade in de la letra y el audio.
+        while (tiempo < fade)
         {
             tiempo += Time.deltaTime;
+            float progreso = Mathf.Clamp01(tiempo / fade);
 
-            audioRecuerdo.volume = Mathf.Lerp(
-                0f,
-                volumenObjetivo,
-                Mathf.Clamp01(tiempo / duracionFadeIn)
-            );
+            audioRecuerdo.volume =
+                Mathf.Lerp(0f, volumenAudio, progreso);
+
+            if (textoLetra != null)
+                textoLetra.alpha = progreso;
 
             yield return null;
         }
 
-        audioRecuerdo.volume = volumenObjetivo;
+        audioRecuerdo.volume = volumenAudio;
 
-        float espera = duracion - duracionFadeIn - duracionFadeOut;
+        if (textoLetra != null)
+            textoLetra.alpha = 1f;
+
+        float espera = duracion - fade * 2f;
 
         if (espera > 0f)
             yield return new WaitForSeconds(espera);
 
+        // Fade out de la letra y el audio.
         tiempo = 0f;
 
-        while (tiempo < duracionFadeOut)
+        while (tiempo < fade)
         {
             tiempo += Time.deltaTime;
+            float progreso = Mathf.Clamp01(tiempo / fade);
 
-            audioRecuerdo.volume = Mathf.Lerp(
-                volumenObjetivo,
-                0f,
-                Mathf.Clamp01(tiempo / duracionFadeOut)
-            );
+            audioRecuerdo.volume =
+                Mathf.Lerp(volumenAudio, 0f, progreso);
+
+            if (textoLetra != null)
+                textoLetra.alpha = 1f - progreso;
 
             yield return null;
         }
 
         audioRecuerdo.Stop();
-        audioRecuerdo.volume = volumenObjetivo;
+        audioRecuerdo.volume = volumenAudio;
+
+        if (textoLetra != null)
+        {
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(false);
+        }
+    }
+
+    private IEnumerator MostrarFrase()
+    {
+        textoFraseFinal.text =
+            "Esta casa ya no guarda nada más de nosotros";
+
+        textoFraseFinal.alpha = 0f;
+        textoFraseFinal.gameObject.SetActive(true);
+
+        float tiempo = 0f;
+
+        while (tiempo < duracionFadeFrase)
+        {
+            tiempo += Time.deltaTime;
+            textoFraseFinal.alpha =
+                Mathf.Clamp01(tiempo / duracionFadeFrase);
+
+            yield return null;
+        }
+
+        textoFraseFinal.alpha = 1f;
+
+        yield return new WaitForSeconds(duracionFrase);
+
+        tiempo = 0f;
+
+        while (tiempo < duracionFadeFrase)
+        {
+            tiempo += Time.deltaTime;
+            textoFraseFinal.alpha =
+                1f - Mathf.Clamp01(tiempo / duracionFadeFrase);
+
+            yield return null;
+        }
+
+        textoFraseFinal.alpha = 0f;
+        textoFraseFinal.gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
