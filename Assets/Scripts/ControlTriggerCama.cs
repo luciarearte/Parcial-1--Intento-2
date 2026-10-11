@@ -1,5 +1,6 @@
 
 using UnityEngine;
+using TMPro;
 using System.Collections;
 
 public class ControlTriggerCama : MonoBehaviour
@@ -8,9 +9,17 @@ public class ControlTriggerCama : MonoBehaviour
     public float duracionAnimacion = 5f;
     public GestorRecuerdos gestor;
 
+    [Header("Audio")]
     public AudioSource audioRecuerdo;
     public float inicioAudio = 0f;
     public float finAudio = 4f;
+    public float volumenAudio = 0.4f;
+
+    [Header("Letra de la canción")]
+    public TMP_Text textoLetra;
+    [TextArea(2, 4)]
+    public string letraRecuerdo = "Escribí acá la letra";
+    public float duracionFade = 0.7f;
 
     public GameObject textoInteraccion;
 
@@ -27,6 +36,13 @@ public class ControlTriggerCama : MonoBehaviour
 
         if (textoInteraccion != null)
             textoInteraccion.SetActive(false);
+
+        if (textoLetra != null)
+        {
+            textoLetra.text = letraRecuerdo;
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(false);
+        }
     }
 
     private void Update()
@@ -35,85 +51,122 @@ public class ControlTriggerCama : MonoBehaviour
             Input.GetKeyDown(KeyCode.E) &&
             !recuerdoActivado)
         {
-            if (muneca != null && gestor != null)
+            if (gestor != null && gestor.CompletarRecuerdo(1))
             {
-                if (gestor.CompletarRecuerdo(1))
-                {
-                    recuerdoActivado = true;
+                recuerdoActivado = true;
 
-                    if (textoInteraccion != null)
-                        textoInteraccion.SetActive(false);
+                if (textoInteraccion != null)
+                    textoInteraccion.SetActive(false);
 
+                if (muneca != null)
                     muneca.SetActive(true);
 
-                    if (audioRecuerdo != null)
-                    {
-                        audioRecuerdo.Stop();
-                        audioRecuerdo.time = inicioAudio;
-                        audioRecuerdo.volume = 0f;
-                        audioRecuerdo.Play();
-
-                        StartCoroutine(FadeInAudio());
-                        StartCoroutine(DetenerAudio());
-                    }
-
-                    StartCoroutine(OcultarMuneca());
-                }
+                StartCoroutine(ReproducirRecuerdo());
+                StartCoroutine(OcultarMuneca());
             }
         }
     }
 
-    private IEnumerator FadeInAudio()
+    private IEnumerator ReproducirRecuerdo()
     {
-        float duracionFadeIn = 2f;
+        float duracion = 0f;
+
+        if (audioRecuerdo != null && audioRecuerdo.clip != null)
+        {
+            float inicio = Mathf.Clamp(
+                inicioAudio, 0f, audioRecuerdo.clip.length);
+
+            float fin = Mathf.Clamp(
+                finAudio, inicio, audioRecuerdo.clip.length);
+
+            duracion = fin - inicio;
+
+            if (duracion > 0f)
+            {
+                audioRecuerdo.Stop();
+                audioRecuerdo.time = inicio;
+                audioRecuerdo.volume = 0f;
+                audioRecuerdo.Play();
+            }
+        }
+
+        if (textoLetra != null)
+        {
+            textoLetra.text = letraRecuerdo;
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(true);
+        }
+
+        if (duracion <= 0f)
+        {
+            if (textoLetra != null)
+            {
+                textoLetra.alpha = 1f;
+                yield return new WaitForSeconds(duracionAnimacion);
+                textoLetra.gameObject.SetActive(false);
+            }
+
+            yield break;
+        }
+
+        float fade = Mathf.Min(duracionFade, duracion / 2f);
         float tiempo = 0f;
 
-        while (tiempo < duracionFadeIn)
+        // Fade in
+        while (tiempo < fade)
         {
             tiempo += Time.deltaTime;
+            float progreso = Mathf.Clamp01(tiempo / fade);
 
-            if (audioRecuerdo == null)
-                yield break;
+            if (audioRecuerdo != null)
+                audioRecuerdo.volume = Mathf.Lerp(0f, volumenAudio, progreso);
 
-            audioRecuerdo.volume = Mathf.Lerp(
-                0f, 0.4f, tiempo / duracionFadeIn
-            );
+            if (textoLetra != null)
+                textoLetra.alpha = progreso;
 
             yield return null;
         }
 
         if (audioRecuerdo != null)
-            audioRecuerdo.volume = 0.4f;
-    }
+            audioRecuerdo.volume = volumenAudio;
 
-    private IEnumerator DetenerAudio()
-    {
-        float duracionFadeOut = 1f;
-        float tiempoTotal = finAudio - inicioAudio;
+        if (textoLetra != null)
+            textoLetra.alpha = 1f;
 
-        yield return new WaitForSeconds(
-            Mathf.Max(0f, tiempoTotal - duracionFadeOut)
-        );
+        // Mantener la letra visible
+        float espera = duracion - fade * 2f;
+        if (espera > 0f)
+            yield return new WaitForSeconds(espera);
 
-        if (audioRecuerdo == null)
-            yield break;
+        // Fade out
+        tiempo = 0f;
 
-        float volumenOriginal = audioRecuerdo.volume;
-        float tiempo = 0f;
-
-        while (tiempo < duracionFadeOut)
+        while (tiempo < fade)
         {
             tiempo += Time.deltaTime;
+            float progreso = Mathf.Clamp01(tiempo / fade);
 
-            audioRecuerdo.volume = Mathf.Lerp(
-                volumenOriginal, 0f, tiempo / duracionFadeOut
-            );
+            if (audioRecuerdo != null)
+                audioRecuerdo.volume = Mathf.Lerp(
+                    volumenAudio, 0f, progreso);
+
+            if (textoLetra != null)
+                textoLetra.alpha = 1f - progreso;
 
             yield return null;
         }
 
-        audioRecuerdo.Stop();
-        audioRecuerdo.volume = 1f;
+        if (audioRecuerdo != null)
+        {
+            audioRecuerdo.Stop();
+            audioRecuerdo.volume = volumenAudio;
+        }
+
+        if (textoLetra != null)
+        {
+            textoLetra.alpha = 0f;
+            textoLetra.gameObject.SetActive(false);
+        }
     }
 
     private IEnumerator OcultarMuneca()
