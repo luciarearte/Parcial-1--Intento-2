@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/copia de seguirdad.unity
+    guid: ae1c682827a485c488c80f6ed8c09be0
   m_configObjects: {}
