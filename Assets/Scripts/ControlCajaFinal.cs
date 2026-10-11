@@ -9,6 +9,7 @@ public class ControlCajaFinal : MonoBehaviour
     public GameObject camaraFinal;
     public GameObject munecaFinal;
     public Image fundidoFinal;
+    public GameObject textoInteraccion;
 
     [Header("Audio final")]
     public AudioSource audioRecuerdo;
@@ -28,6 +29,9 @@ public class ControlCajaFinal : MonoBehaviour
 
         if (munecaFinal != null)
             munecaFinal.SetActive(false);
+
+        if (textoInteraccion != null)
+            textoInteraccion.SetActive(false);
 
         if (fundidoFinal != null)
         {
@@ -51,17 +55,17 @@ public class ControlCajaFinal : MonoBehaviour
         {
             finalActivado = true;
 
-            // Ocultar la caja sin desactivar este objeto.
+            if (textoInteraccion != null)
+                textoInteraccion.SetActive(false);
+
             foreach (Renderer r in GetComponentsInChildren<Renderer>())
                 r.enabled = false;
 
             foreach (Collider c in GetComponentsInChildren<Collider>())
                 c.enabled = false;
 
-            // Iniciar el audio del final.
             StartCoroutine(ReproducirAudioFinal());
 
-            // Mantener la cinemática existente.
             if (camaraJugador != null)
                 camaraJugador.SetActive(false);
 
@@ -80,7 +84,9 @@ public class ControlCajaFinal : MonoBehaviour
     {
         if (audioRecuerdo == null || audioRecuerdo.clip == null)
         {
-            Debug.LogWarning("Falta asignar el AudioSource o el AudioClip del final.");
+            Debug.LogWarning(
+                "Falta asignar el AudioSource o el AudioClip del final."
+            );
             yield break;
         }
 
@@ -105,7 +111,6 @@ public class ControlCajaFinal : MonoBehaviour
         audioRecuerdo.volume = 0f;
         audioRecuerdo.Play();
 
-        // Fade in.
         float tiempo = 0f;
 
         while (tiempo < fadeIn)
@@ -119,13 +124,11 @@ public class ControlCajaFinal : MonoBehaviour
 
         audioRecuerdo.volume = volumenAudio;
 
-        // Mantener el audio hasta el momento del fade out.
         float espera = duracion - fadeIn - fadeOut;
 
         if (espera > 0f)
             yield return new WaitForSeconds(espera);
 
-        // Fade out.
         tiempo = 0f;
 
         while (tiempo < fadeOut)
@@ -169,6 +172,9 @@ public class ControlCajaFinal : MonoBehaviour
             other.name.ToLower() == "jugador")
         {
             jugadorEnZona = true;
+
+            if (textoInteraccion != null && !finalActivado)
+                textoInteraccion.SetActive(true);
         }
     }
 
@@ -178,6 +184,9 @@ public class ControlCajaFinal : MonoBehaviour
             other.name.ToLower() == "jugador")
         {
             jugadorEnZona = false;
+
+            if (textoInteraccion != null)
+                textoInteraccion.SetActive(false);
         }
     }
 }

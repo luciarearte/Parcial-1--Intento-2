@@ -1,5 +1,6 @@
 
 using UnityEngine;
+using TMPro;
 using System.Collections;
 
 public class ControlTriggerRadio : MonoBehaviour
@@ -7,7 +8,11 @@ public class ControlTriggerRadio : MonoBehaviour
     public GestorRecuerdos gestor;
     public GameObject munecaBailando;
     public GameObject textoInteraccion;
+    public TMP_Text textoFraseFinal;
+
     public float duracionRecuerdo = 8f;
+    public float duracionFrase = 4f;
+    public float duracionFadeFrase = 1.5f;
 
     public AudioSource audioRecuerdo;
     public float inicioAudio = 0f;
@@ -23,6 +28,18 @@ public class ControlTriggerRadio : MonoBehaviour
 
         if (textoInteraccion != null)
             textoInteraccion.SetActive(false);
+
+        if (textoFraseFinal != null)
+        {
+            textoFraseFinal.text =
+                "Esta casa ya no guarda nada más de nosotros";
+
+            Color color = textoFraseFinal.color;
+            color.a = 0f;
+            textoFraseFinal.color = color;
+
+            textoFraseFinal.gameObject.SetActive(false);
+        }
 
         if (audioRecuerdo == null)
             audioRecuerdo = GetComponent<AudioSource>();
@@ -42,16 +59,86 @@ public class ControlTriggerRadio : MonoBehaviour
                     textoInteraccion.SetActive(false);
 
                 if (munecaBailando != null)
-                {
                     munecaBailando.SetActive(true);
-                    StartCoroutine(OcultarMuneca());
-                }
 
                 Debug.Log("Recuerdo de la radio activado.");
 
-                StartCoroutine(ReproducirAudio());
+                StartCoroutine(SecuenciaRecuerdo());
             }
         }
+    }
+
+    private IEnumerator SecuenciaRecuerdo()
+    {
+        float duracionAudio = 0f;
+
+        if (audioRecuerdo != null && audioRecuerdo.clip != null)
+        {
+            float inicio = Mathf.Clamp(
+                inicioAudio, 0f, audioRecuerdo.clip.length
+            );
+
+            float fin = Mathf.Clamp(
+                finAudio, inicio, audioRecuerdo.clip.length
+            );
+
+            duracionAudio = fin - inicio;
+        }
+
+        StartCoroutine(ReproducirAudio());
+
+        yield return new WaitForSeconds(
+            Mathf.Max(duracionRecuerdo, duracionAudio)
+        );
+
+        if (munecaBailando != null)
+            munecaBailando.SetActive(false);
+
+        if (textoFraseFinal != null)
+            yield return StartCoroutine(MostrarFrase());
+    }
+
+    private IEnumerator MostrarFrase()
+    {
+        textoFraseFinal.text =
+            "Esta casa ya no guarda nada más de nosotros";
+
+        textoFraseFinal.gameObject.SetActive(true);
+
+        Color color = textoFraseFinal.color;
+
+        // Fade in: aparece lentamente.
+        float tiempo = 0f;
+
+        while (tiempo < duracionFadeFrase)
+        {
+            tiempo += Time.deltaTime;
+            color.a = Mathf.Clamp01(tiempo / duracionFadeFrase);
+            textoFraseFinal.color = color;
+            yield return null;
+        }
+
+        color.a = 1f;
+        textoFraseFinal.color = color;
+
+        // Mantener la frase visible.
+        yield return new WaitForSeconds(duracionFrase);
+
+        // Fade out: desaparece lentamente.
+        tiempo = 0f;
+
+        while (tiempo < duracionFadeFrase)
+        {
+            tiempo += Time.deltaTime;
+            color.a = 1f - Mathf.Clamp01(tiempo / duracionFadeFrase);
+            textoFraseFinal.color = color;
+            yield return null;
+        }
+
+        color.a = 0f;
+        textoFraseFinal.color = color;
+
+        textoFraseFinal.gameObject.SetActive(false);
     }
 
     private IEnumerator ReproducirAudio()
@@ -120,14 +207,6 @@ public class ControlTriggerRadio : MonoBehaviour
 
         audioRecuerdo.Stop();
         audioRecuerdo.volume = volumenObjetivo;
-    }
-
-    private IEnumerator OcultarMuneca()
-    {
-        yield return new WaitForSeconds(duracionRecuerdo);
-
-        if (munecaBailando != null)
-            munecaBailando.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
