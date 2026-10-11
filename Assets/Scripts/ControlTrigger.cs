@@ -11,6 +11,8 @@ public class ControlTrigger : MonoBehaviour
     public float inicioAudio = 0f;
     public float finAudio = 4f;
 
+    public GameObject textoInteraccion;
+
     private bool jugadorEnZona = false;
     private bool recuerdoActivado = false;
 
@@ -18,6 +20,9 @@ public class ControlTrigger : MonoBehaviour
     {
         if (indicadorE != null)
             indicadorE.SetActive(false);
+
+        if (textoInteraccion != null)
+            textoInteraccion.SetActive(false);
 
         if (audioRecuerdo == null)
             audioRecuerdo = GetComponent<AudioSource>();
@@ -36,25 +41,20 @@ public class ControlTrigger : MonoBehaviour
             {
                 recuerdoActivado = true;
 
-                Debug.Log("Recuerdo recogido: " + gameObject.name);
-
                 if (indicadorE != null)
                     indicadorE.SetActive(false);
 
-                // Ocultar el vaso inmediatamente.
-                Renderer[] renderers =
-                    GetComponentsInChildren<Renderer>();
+                if (textoInteraccion != null)
+                    textoInteraccion.SetActive(false);
 
-                foreach (Renderer r in renderers)
+                Debug.Log("Recuerdo recogido: " + gameObject.name);
+
+                foreach (Renderer r in GetComponentsInChildren<Renderer>())
                     r.enabled = false;
 
-                Collider[] colliders =
-                    GetComponentsInChildren<Collider>();
-
-                foreach (Collider c in colliders)
+                foreach (Collider c in GetComponentsInChildren<Collider>())
                     c.enabled = false;
 
-                // Reproducir el audio antes de eliminar el objeto.
                 StartCoroutine(ReproducirAudioYEliminar());
             }
         }
@@ -68,7 +68,9 @@ public class ControlTrigger : MonoBehaviour
             yield break;
         }
 
-        float duracion = finAudio - inicioAudio;
+        float inicio = Mathf.Clamp(inicioAudio, 0f, audioRecuerdo.clip.length);
+        float fin = Mathf.Clamp(finAudio, inicio, audioRecuerdo.clip.length);
+        float duracion = fin - inicio;
 
         if (duracion <= 0f)
         {
@@ -81,47 +83,38 @@ public class ControlTrigger : MonoBehaviour
         float duracionFadeOut = Mathf.Min(1f, duracion * 0.5f);
 
         audioRecuerdo.Stop();
-        audioRecuerdo.time = inicioAudio;
+        audioRecuerdo.time = inicio;
         audioRecuerdo.volume = 0f;
         audioRecuerdo.Play();
 
-        // Fade in: entrada gradual durante 2 segundos.
         float tiempo = 0f;
 
         while (tiempo < duracionFadeIn)
         {
             tiempo += Time.deltaTime;
-
             audioRecuerdo.volume = Mathf.Lerp(
-                0f,
-                volumenObjetivo,
+                0f, volumenObjetivo,
                 Mathf.Clamp01(tiempo / duracionFadeIn)
             );
-
             yield return null;
         }
 
         audioRecuerdo.volume = volumenObjetivo;
 
-        // Esperar hasta el momento del fade out.
         float espera = duracion - duracionFadeIn - duracionFadeOut;
 
         if (espera > 0f)
             yield return new WaitForSeconds(espera);
 
-        // Fade out: salida gradual durante el último segundo.
         tiempo = 0f;
 
         while (tiempo < duracionFadeOut)
         {
             tiempo += Time.deltaTime;
-
             audioRecuerdo.volume = Mathf.Lerp(
-                volumenObjetivo,
-                0f,
+                volumenObjetivo, 0f,
                 Mathf.Clamp01(tiempo / duracionFadeOut)
             );
-
             yield return null;
         }
 
@@ -138,8 +131,14 @@ public class ControlTrigger : MonoBehaviour
         {
             jugadorEnZona = true;
 
-            if (indicadorE != null && !recuerdoActivado)
-                indicadorE.SetActive(true);
+            if (!recuerdoActivado)
+            {
+                if (indicadorE != null)
+                    indicadorE.SetActive(true);
+
+                if (textoInteraccion != null)
+                    textoInteraccion.SetActive(true);
+            }
         }
     }
 
@@ -152,6 +151,9 @@ public class ControlTrigger : MonoBehaviour
 
             if (indicadorE != null)
                 indicadorE.SetActive(false);
+
+            if (textoInteraccion != null)
+                textoInteraccion.SetActive(false);
         }
     }
 }
