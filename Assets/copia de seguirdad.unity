@@ -7914,6 +7914,7 @@ MonoBehaviour:
   audioRecuerdo: {fileID: 819784555}
   inicioAudio: 0
   finAudio: 5
+  textoInteraccion: {fileID: 0}
 --- !u!65 &819784553
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14948,74 +14949,6 @@ Mesh:
     offset: 0
     size: 0
     path: 
---- !u!1 &1531973280
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1531973283}
-  - component: {fileID: 1531973282}
-  - component: {fileID: 1531973281}
-  m_Layer: 0
-  m_Name: EventSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1531973281
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1531973280}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
---- !u!114 &1531973282
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1531973280}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!4 &1531973283
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1531973280}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1547271204
 GameObject:
   m_ObjectHideFlags: 0
@@ -17739,7 +17672,11 @@ MonoBehaviour:
   camaraFinal: {fileID: 73939560}
   munecaFinal: {fileID: 1371779994}
   fundidoFinal: {fileID: 315642773}
-  duracionFundido: 4
+  audioRecuerdo: {fileID: 1760123949}
+  inicioAudio: 35
+  finAudio: 55
+  volumenAudio: 0.4
+  duracionFundido: 12
 --- !u!65 &1760123947
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -17769,13 +17706,13 @@ AudioReverbFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1760123941}
   m_Enabled: 1
-  m_DryLevel: 0
+  m_DryLevel: -100
   m_Room: 0
   m_RoomHF: 0
-  m_DecayTime: 1
-  m_DecayHFRatio: 0.5
-  m_ReflectionsLevel: -10000
-  m_ReverbLevel: 0
+  m_DecayTime: 2.5
+  m_DecayHFRatio: 1.3
+  m_ReflectionsLevel: -602
+  m_ReverbLevel: -302
   m_ReverbDelay: 0.04
   m_Diffusion: 100
   m_Density: 100
@@ -17794,9 +17731,9 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
-  m_Volume: 1
+  m_audioClip: {fileID: 8300000, guid: 353919363b84d194da845239522a7657, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.315
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -22479,7 +22416,6 @@ SceneRoots:
   - {fileID: 571777603}
   - {fileID: 1547271206}
   - {fileID: 394652695}
-  - {fileID: 1531973283}
   - {fileID: 395602737}
   - {fileID: 1714576191}
   - {fileID: 549913618}

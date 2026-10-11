@@ -12,6 +12,8 @@ public class ControlTriggerCama : MonoBehaviour
     public float inicioAudio = 0f;
     public float finAudio = 4f;
 
+    public GameObject textoInteraccion;
+
     private bool jugadorEnZona = false;
     private bool recuerdoActivado = false;
 
@@ -22,6 +24,9 @@ public class ControlTriggerCama : MonoBehaviour
 
         if (audioRecuerdo == null)
             audioRecuerdo = GetComponent<AudioSource>();
+
+        if (textoInteraccion != null)
+            textoInteraccion.SetActive(false);
     }
 
     private void Update()
@@ -35,6 +40,10 @@ public class ControlTriggerCama : MonoBehaviour
                 if (gestor.CompletarRecuerdo(1))
                 {
                     recuerdoActivado = true;
+
+                    if (textoInteraccion != null)
+                        textoInteraccion.SetActive(false);
+
                     muneca.SetActive(true);
 
                     if (audioRecuerdo != null)
@@ -67,9 +76,7 @@ public class ControlTriggerCama : MonoBehaviour
                 yield break;
 
             audioRecuerdo.volume = Mathf.Lerp(
-                0f,
-                0.4f,
-                tiempo / duracionFadeIn
+                0f, 0.4f, tiempo / duracionFadeIn
             );
 
             yield return null;
@@ -99,9 +106,7 @@ public class ControlTriggerCama : MonoBehaviour
             tiempo += Time.deltaTime;
 
             audioRecuerdo.volume = Mathf.Lerp(
-                volumenOriginal,
-                0f,
-                tiempo / duracionFadeOut
+                volumenOriginal, 0f, tiempo / duracionFadeOut
             );
 
             yield return null;
@@ -125,6 +130,9 @@ public class ControlTriggerCama : MonoBehaviour
             other.name.ToLower() == "jugador")
         {
             jugadorEnZona = true;
+
+            if (!recuerdoActivado && textoInteraccion != null)
+                textoInteraccion.SetActive(true);
         }
     }
 
@@ -134,6 +142,9 @@ public class ControlTriggerCama : MonoBehaviour
             other.name.ToLower() == "jugador")
         {
             jugadorEnZona = false;
+
+            if (textoInteraccion != null)
+                textoInteraccion.SetActive(false);
         }
     }
 }
